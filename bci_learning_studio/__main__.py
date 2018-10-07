@@ -4,14 +4,16 @@ import logging
 import argparse
 
 from bci_learning_studio import __version__
+import bci_learning_studio.command
 
 VERSION_STRING = 'BCI Learning Studio {}'.format(__version__)
 
 
-def _parse_args():
+def _parse_args(commands):
     parser = argparse.ArgumentParser(
         description='Start BCI learning studio.',
     )
+    parser.add_argument('command', choices=commands)
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--version', action='version', version=VERSION_STRING)
     namespace, args = parser.parse_known_args()
@@ -23,10 +25,14 @@ def _parse_args():
 
 
 def main():
-    """Entrypoint for `openbci_interface` command"""
-    namespace, args = _parse_args()
+    """Entrypoint for `bci_learning_studio` command"""
+    subcommands = {
+        module: getattr(bci_learning_studio.command, module)
+        for module in bci_learning_studio.command.__all__
+    }
+    namespace, args = _parse_args(subcommands)
     _init_logger(namespace.debug)
-    raise NotImplementedError('Not implemented yet...')
+    subcommands[namespace.command](args)
 
 
 def _init_logger(debug=False):

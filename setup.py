@@ -62,7 +62,8 @@ def _set_up():
         ),
         test_suite='tests',
         install_requires=[
-            'openbci_interface'
+            'pyqt5',
+            'openbci_interface',
         ],
         extras_require={
             'dev': [
