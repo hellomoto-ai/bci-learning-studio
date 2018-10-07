@@ -1,1 +1,1 @@
-# bci-learning-studio
+# BCI Learning Studio

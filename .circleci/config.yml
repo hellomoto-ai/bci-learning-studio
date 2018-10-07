@@ -1,0 +1,46 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/build
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "setup.py" }}
+          - v1-dependencies-
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install .[dev] codacy-coverage
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "setup.py" }}
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            mkdir test-repoorts
+            pytest \
+              --cov=bci_learning_studio \
+              --cov-report xml:coverage.xml \
+              --junitxml=test-reports/junit.xml \
+              tests
+            flake8 bci_learning_studio
+            python-codacy-coverage -r coverage.xml
+
+      - store_test_results:
+          path: test-reports
+
+      - store_artifacts:
+          path: test-reports
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
