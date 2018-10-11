@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="bci_learning_studio">
+    <file>resource/baseline-phonelink_off-24px.svg</file>
+    <file>resource/baseline-phonelink-24px.svg</file>
+    <file>resource/baseline-check-24px.svg</file>
+    <file>resource/baseline-close-24px.svg</file>
+    <file>resource/baseline-refresh-24px.svg</file>
+  </qresource>
+</RCC>
