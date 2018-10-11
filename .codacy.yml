@@ -1,0 +1,3 @@
+exclude_paths:
+  - '*_Ui.py'
+  - '*_rc.py'
