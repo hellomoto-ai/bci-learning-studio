@@ -40,6 +40,8 @@ class _TextWidgetHandler(logging.Handler):
         # (as in `refresh` method), it is necessary to re-compare log level.
         if record.levelno >= self.level:
             self.text_widget.append(self.format(record))
+        bar = self.text_widget.verticalScrollBar()
+        bar.setValue(bar.maximum())
 
     def clear(self):
         """Clear displayed logs and log buffers in this class"""
@@ -73,8 +75,8 @@ class LogWidget(QtGui.QWidget, Ui_LogWidget):
         super().__init__(parent)
         self.setupUi(self)
 
-        self.pushButtonClear.pushed.connect(self._clear)
-        self.pushButtonSave.pushed.conenct(self._save)
+        self.pushButtonClear.clicked.connect(self._clear)
+        self.pushButtonSave.clicked.connect(self._save)
         self.comboBoxFilter.addItems([
             'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL',
         ])
