@@ -37,14 +37,16 @@ def main():
 
 def _init_logger(debug=False):
     """Initialize logger"""
-    header = '%(asctime)s: %(levelname)5s'
+    header = '%(asctime)s: %(levelname)8s'
     if debug:
         header += ' %(funcName)10s %(lineno)d'
     format_ = '{}: %(message)s'.format(header)
     logging.basicConfig(
-        format=format_,
-        level=logging.DEBUG if debug else logging.INFO,
+        format=format_, level=logging.DEBUG,
     )
+
+    for handler in logging.getLogger().handlers:
+        handler.setLevel(logging.DEBUG if debug else logging.INFO)
 
 
 if __name__ == '__main__':
