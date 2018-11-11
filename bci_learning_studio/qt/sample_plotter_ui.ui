@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DeviceManager</class>
- <widget class="QMainWindow" name="DeviceManager">
+ <class>SamplePlotter</class>
+ <widget class="QMainWindow" name="SamplePlotter">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
-    <height>429</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Device Manager</string>
+   <string>Plot</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="DeviceManagerWidget" name="widget" native="true"/>
+     <widget class="GraphicsLayoutWidget" name="graphWidget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -24,9 +24,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>DeviceManagerWidget</class>
+   <class>GraphicsLayoutWidget</class>
    <extends>QWidget</extends>
-   <header>bci_learning_studio/qt/DeviceManagerWidget</header>
+   <header>pyqtgraph</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
