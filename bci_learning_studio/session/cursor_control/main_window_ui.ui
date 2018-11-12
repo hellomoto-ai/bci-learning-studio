@@ -38,12 +38,12 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionRecord"/>
    <addaction name="actionStart"/>
-   <addaction name="actionSave"/>
    <addaction name="separator"/>
    <addaction name="actionDevice"/>
   </widget>
-  <action name="actionStart">
+  <action name="actionRecord">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -53,7 +53,7 @@
      <normalon>:/icon/resource/baseline-stop-24px.svg</normalon>:/icon/resource/baseline-fiber_manual_record-24px.svg</iconset>
    </property>
    <property name="text">
-    <string>Start</string>
+    <string>Record</string>
    </property>
   </action>
   <action name="actionSave">
@@ -84,6 +84,15 @@
    </property>
    <property name="text">
     <string>Plot</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="icon">
+    <iconset resource="../../qt/bci_learning_studio.qt.resource.qrc">
+     <normaloff>:/icon/resource/baseline-play_arrow-24px.svg</normaloff>:/icon/resource/baseline-play_arrow-24px.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Start</string>
    </property>
   </action>
  </widget>
