@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DeviceManager</class>
+ <widget class="QMainWindow" name="DeviceManager">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>577</width>
+    <height>343</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Device Manager</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="DeviceStatus" name="deviceStatus" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>150</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="LogWidget" name="logWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionConnect"/>
+   <addaction name="actionStream"/>
+   <addaction name="actionConfigure"/>
+   <addaction name="actionPlot"/>
+  </widget>
+  <action name="actionConnect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="bci_learning_studio.qt.resource.qrc">
+     <normaloff>:/icon/resource/baseline-phonelink-24px.svg</normaloff>
+     <normalon>:/icon/resource/baseline-phonelink_off-24px.svg</normalon>:/icon/resource/baseline-phonelink-24px.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionStream">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="bci_learning_studio.qt.resource.qrc">
+     <normaloff>:/icon/resource/baseline-play_arrow-24px.svg</normaloff>
+     <normalon>:/icon/resource/baseline-stop-24px.svg</normalon>:/icon/resource/baseline-play_arrow-24px.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Stream</string>
+   </property>
+  </action>
+  <action name="actionConfigure">
+   <property name="icon">
+    <iconset resource="bci_learning_studio.qt.resource.qrc">
+     <normaloff>:/icon/resource/baseline-settings-20px.svg</normaloff>:/icon/resource/baseline-settings-20px.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Configure</string>
+   </property>
+  </action>
+  <action name="actionPlot">
+   <property name="icon">
+    <iconset resource="bci_learning_studio.qt.resource.qrc">
+     <normaloff>:/icon/resource/baseline-show_chart-24px.svg</normaloff>:/icon/resource/baseline-show_chart-24px.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Plot</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DeviceStatus</class>
+   <extends>QWidget</extends>
+   <header>.device_status</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LogWidget</class>
+   <extends>QWidget</extends>
+   <header>.log_widget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="bci_learning_studio.qt.resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

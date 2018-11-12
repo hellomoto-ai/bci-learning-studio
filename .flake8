@@ -1,4 +1,4 @@
 [flake8]
 exclude =
-	*_Ui.py
+	*_ui.py
 	*_rc.py

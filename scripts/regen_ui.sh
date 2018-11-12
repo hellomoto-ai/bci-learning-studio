@@ -6,11 +6,4 @@ find . -type f -name '*.ui' | while read src; do
     pyuic5 "${src}" -o "${tgt}"
 done
 
-find . -type f -name '*.qrc' | while read src; do
-    echo "Converting ${src}"
-    IFS='.' read -r -a array <<< "${src}"
-    n_elems="${#array[@]}"
-    filename="${array[${n_elems}-2]}_rc.py"
-    tgt="$(dirname "${src}")/${filename}"
-    pyrcc5 "${src}" -o "${tgt}"
-done
+# pyrcc5 bci_learning_studio/qt/bci_learning_studio.qt.resource.qrc -o bci_learning_studio/qt/resource_rc.py

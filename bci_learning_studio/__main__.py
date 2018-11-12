@@ -1,5 +1,6 @@
 """Entrypoint for CLI"""
 
+import sys
 import logging
 import argparse
 
@@ -32,12 +33,14 @@ def main():
     }
     namespace, args = _parse_args(subcommands)
     _init_logger(namespace.debug)
-    subcommands[namespace.command](args)
+    main_func = subcommands[namespace.command]
+    status_code = main_func(args)
+    sys.exit(status_code)
 
 
 def _init_logger(debug=False):
     """Initialize logger"""
-    header = '%(asctime)s: %(levelname)8s'
+    header = '%(asctime)s: %(levelname)8s [%(threadName)s]'
     if debug:
         header += ' %(funcName)10s %(lineno)d'
     format_ = '{}: %(message)s'.format(header)

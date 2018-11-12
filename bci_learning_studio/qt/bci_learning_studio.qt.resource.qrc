@@ -1,9 +1,17 @@
 <RCC>
-  <qresource prefix="bci_learning_studio">
+  <qresource prefix="/icon">
+    <file>resource/baseline-show_chart-24px.svg</file>
+    <file>resource/baseline-settings-20px.svg</file>
+    <file>resource/baseline-stop-24px.svg</file>
+    <file>resource/baseline-play_arrow-24px.svg</file>
+    <file>resource/baseline-developer_board-24px.svg</file>
+    <file>resource/outline-fiber_manual_record-24px.svg</file>
     <file>resource/baseline-phonelink_off-24px.svg</file>
     <file>resource/baseline-phonelink-24px.svg</file>
     <file>resource/baseline-check-24px.svg</file>
     <file>resource/baseline-close-24px.svg</file>
     <file>resource/baseline-refresh-24px.svg</file>
+    <file>resource/baseline-save-24px.svg</file>
+    <file>resource/baseline-fiber_manual_record-24px.svg</file>
   </qresource>
 </RCC>
