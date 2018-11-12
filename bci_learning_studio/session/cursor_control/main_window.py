@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 import datetime
@@ -9,6 +10,24 @@ from bci_learning_studio.qt.device_manager import DeviceManager
 from .main_window_ui import Ui_MainWindow
 
 _LG = logging.getLogger(__name__)
+
+
+def _ask_save_path():
+    default_path = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')
+    default_dir = qt_util.get_settings('default_save_path')
+    if default_dir:
+        default_path = os.path.join(default_dir, default_path)
+
+    options = QtWidgets.QFileDialog.Options(
+        QtWidgets.QFileDialog.DontConfirmOverwrite |
+        QtWidgets.QFileDialog.DontUseNativeDialog
+    )
+    filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+        None, 'Select recording path', default_path, 'JSON (*.json)',
+        options=options)
+
+    qt_util.store_settings(default_save_path=os.path.dirname(filename))
+    return filename
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -84,7 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self._stop_recording()
 
     def _start_recording(self):
-        filename = self._ask_save_path()
+        filename = _ask_save_path()
         if not filename:  # user canneled.
             self.ui.actionRecord.setChecked(False)
             return
@@ -94,14 +113,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def _stop_recording(self):
         self._recording = False
         self._save_path = None
-
-    def _ask_save_path(self):
-        filename = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')
-        options = QtWidgets.QFileDialog.Options()
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, 'Save recording to file', filename, 'JSON Files (*.json)',
-            options=options)
-        return filename
 
     def _save(self):
         _LG.info('Saving data %s', self._save_path)

@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 
 class PeriodicCall(QtCore.QThread):
@@ -38,10 +38,15 @@ def restore_window_position(window):
         window.restoreState(val)
 
 
-def ask_save_path(parent, default_filename):
-    filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-        parent, 'Save recording to file',
-        default_filename,
-        'JSON Files (*.json)',
-        options=QtWidgets.QFileDialog.Options())
-    return filename
+def store_settings(**kwargs):
+    settings = QtCore.QSettings()
+    for key, value in kwargs.items():
+        settings.setValue(key, value)
+
+
+def get_settings(key, *other_keys):
+    settings = QtCore.QSettings()
+    if not other_keys:
+        return settings.value(key)
+    keys = [key] + other_keys
+    return [settings.value(key) for key in keys]
