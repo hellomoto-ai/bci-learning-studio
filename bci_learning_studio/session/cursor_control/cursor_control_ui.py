@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CursorControl(object):
     def setupUi(self, CursorControl):
         CursorControl.setObjectName("CursorControl")
-        CursorControl.resize(400, 300)
+        CursorControl.resize(400, 400)
 
         self.retranslateUi(CursorControl)
         QtCore.QMetaObject.connectSlotsByName(CursorControl)
