@@ -52,7 +52,7 @@ class Ui_MainWindow(object):
         self.actionPlot.setObjectName("actionPlot")
         self.actionStart = QtWidgets.QAction(MainWindow)
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icon/resource/baseline-play_arrow-24px.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap(":/icon/resource/baseline-games-24px.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionStart.setIcon(icon4)
         self.actionStart.setObjectName("actionStart")
         self.toolBar.addAction(self.actionRecord)
