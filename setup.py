@@ -63,6 +63,7 @@ def _set_up():
         test_suite='tests',
         install_requires=[
             'pyqt5',
+            'u-msgpack-python == 2.5.0',
             'openbci_interface',
         ],
         extras_require={

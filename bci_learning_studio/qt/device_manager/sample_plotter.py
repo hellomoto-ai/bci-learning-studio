@@ -1,6 +1,7 @@
 import logging
 
 from PyQt5 import QtCore, QtWidgets
+import pyqtgraph
 
 from bci_learning_studio.qt import qt_util
 from .sample_plotter_ui import Ui_SamplePlotter
@@ -11,7 +12,7 @@ _LG = logging.getLogger(__name__)
 class SamplePlotter(QtWidgets.QMainWindow):
     closed = QtCore.pyqtSignal()
 
-    def __init__(self, parent, history=250 * 7):
+    def __init__(self, parent, history=250 * 3):
         super().__init__(parent=parent)
         self.ui = Ui_SamplePlotter()
         self.ui.setupUi(self)
@@ -26,7 +27,7 @@ class SamplePlotter(QtWidgets.QMainWindow):
         qt_util.restore_window_position(self)
 
     def showEvent(self, event):
-        self._timer = qt_util.PeriodicCall(fps=10)
+        self._timer = qt_util.PeriodicCall(fps=8)
         self._timer.elapsed.connect(self._plot)
         self._timer.start()
         event.accept()
@@ -69,11 +70,9 @@ class SamplePlotter(QtWidgets.QMainWindow):
 
     def _init_plot(self):
         self.ui.graphWidget.clear()
-        for i in range(len(self._buffer)):
-            row = i % 8
-            col = i // 8
-            title = 'Channel %s' % (i + 1)
-            plot = self.ui.graphWidget.addPlot(row=row, col=col, title=title)
-            line = plot.plot([])
-            self._plots.append(plot)
+        title = 'Channels'
+        plot = self.ui.graphWidget.addPlot(row=1, col=1, title=title)
+        self._plots.append(plot.showGrid(x=True, y=True, alpha=1))
+        for _ in range(len(self._buffer)):
+            line = plot.plot([], pen=pyqtgraph.mkPen(color=(0, 0, 255)))
             self._lines.append(line)

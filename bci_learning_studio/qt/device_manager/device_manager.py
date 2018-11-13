@@ -1,57 +1,18 @@
 import time
 import logging
 
-import serial
 import openbci_interface
+import serial as pyserial
 from PyQt5 import QtCore, QtWidgets
 
 from bci_learning_studio.qt import qt_util
 from .device_manager_ui import Ui_DeviceManager
 from .device_selector import DeviceSelector
-from .device_config import get_config_dialog
+from . import device_config
+from .sample_acquisition import SampleAcquisitionThread
 from .sample_plotter import SamplePlotter
 
 _LG = logging.getLogger(__name__)
-
-
-class SampleAcquisitionThread(QtCore.QThread):
-    acquired = QtCore.pyqtSignal('PyQt_PyObject')
-
-    def __init__(self, board, wait_factor=0.85):
-        super().__init__()
-        self._board = board
-        self.wait_factor = wait_factor
-
-    def run(self):
-        _LG.info('Starting sample acquisition thread.')
-
-        # `cycle` here is a sensitive value;
-        # Setting it same as (1.0 * board.cycle) will cause sample acquisition
-        # out of sync (delayed) and you will see end byte not matching to
-        # expected value -> wrong value.
-        # Setting it to (0.5 * board.cycle) will cause sample acquisition
-        # too quick so that sample distribution over time is skewed.
-        #
-        # 0.85 was found okay in the sense that it does not cause wrong
-        # end byte while sample distribution over time is kind of smooth.
-        cycle = self.wait_factor * self._board.cycle
-        unit_wait = cycle / 10.0
-        last_acquired = time.time()
-        while self._board.streaming:
-            now = time.time()
-            if now - last_acquired < cycle:
-                self.sleep(unit_wait)
-                continue
-            try:
-                sample = self._board.read_sample()
-                if sample['valid']:
-                    self.acquired.emit(sample)
-            except serial.serialutil.SerialException:
-                _LG.info('Connection seems to be closed.')
-            except Exception:  # pylint: disable=broad-except
-                _LG.exception('failed to fetch')
-            last_acquired = now
-        _LG.info('Sample acquisition thread stopped.')
 
 
 def _user_confirms(parent, title, message):
@@ -62,26 +23,31 @@ def _user_confirms(parent, title, message):
     return result == QtWidgets.QMessageBox.Yes
 
 
-def _get_config(board):
-    return {
-        'board': {
-            'board_mode': board.board_mode,
-            'sample_rate': board.sample_rate,
-        },
-        'channel': [
-            {
-                'enabled': config.enabled,
-                'parameters': {
-                    'power_down': config.power_down,
-                    'gain': config.gain,
-                    'input_type': config.input_type,
-                    'bias': config.bias,
-                    'srb2': config.srb2,
-                    'srb1': config.srb1,
-                },
-            } for config in board.channel_configs
-        ],
-    }
+def _connect(device):
+    try:
+        ser = pyserial.Serial(port=device, baudrate=115200, timeout=3)
+    except Exception:  # pylint: disable=broad-except
+        err_msg = 'Failed to open serial connection; %s' % device
+        raise RuntimeError(err_msg) from None
+
+    try:
+        ser.write(b'v')
+        message = ser.read_until(b'$$$').decode('utf-8', errors='ignore')
+    except Exception:  # pylint: disable=broad-except
+        ser.close()
+        err_msg = 'Failed to fetch board info from %s' % device
+        raise RuntimeError(err_msg) from None
+
+    if not message.endswith('$$$'):
+        err_msg = 'Failed to fetch board info.'
+        raise RuntimeError(err_msg) from None
+
+    if 'ADS1299' in message:
+        board = openbci_interface.Cyton(ser, close_on_terminate=True)
+        board.initialize()
+        return board
+
+    raise RuntimeError('Unexpected board. %s' % message)
 
 
 class DeviceManager(QtWidgets.QMainWindow):
@@ -106,6 +72,7 @@ class DeviceManager(QtWidgets.QMainWindow):
         self._board = None
         self._sample_acquisition = None
         self._board_config = None
+        self._selector = None
 
         qt_util.restore_window_position(self)
 
@@ -130,8 +97,7 @@ class DeviceManager(QtWidgets.QMainWindow):
         self.ui.actionStream.setChecked(False)
         self.ui.actionStream.setText('Stream')
         self.ui.actionConfigure.setEnabled(True)
-        self.ui.deviceStatus.set_sample_rate(0)
-        self.ui.deviceStatus.set_board_info(self._board.board_info)
+        self.ui.deviceStatus.init(self._board.board_info)
 
     def _set_ui_disconnected(self):
         self.ui.actionConnect.setChecked(False)
@@ -143,7 +109,7 @@ class DeviceManager(QtWidgets.QMainWindow):
 
     def _toggle_connect(self, checked):
         if checked:
-            self._launch_detector()
+            self._launch_selector()
             self.ui.actionConnect.setChecked(False)
             self.connected.emit(True)
         else:
@@ -158,27 +124,25 @@ class DeviceManager(QtWidgets.QMainWindow):
             self.disconnect()
             self.connected.emit(False)
 
-    def _launch_detector(self):
-        selector = DeviceSelector(parent=self)
-        selector.message.connect(self._show_message)
-        selector.detected.connect(self._connect)
-        selector.show()
+    def _launch_selector(self):
+        self._selector = DeviceSelector(parent=self)
+        self._selector.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self._selector.selected.connect(self._connect_board)
+        self._selector.show()
 
-    def _connect(self, device, board_type):
+    def _connect_board(self, device):
+        self._selector.hide()
+        self._show_message('Connecting %s' % device)
         try:
-            board_class = getattr(openbci_interface, board_type)
-        except AttributeError:
-            self._show_message('Unsupported board type: %s' % board_type)
+            self._board = _connect(device)
+        except Exception as error:  # pylint: disable=broad-except
+            self._show_message(str(error))
+            _LG.exception('Failed to initialize device; %s', device)
+            self._selector.show()
             return
-        self._initialize_board(device, board_class)
+        self._show_message('Connected %s' % device)
+        self._selector.close()
         self._set_ui_connected()
-
-    def _initialize_board(self, port, board_class):
-        self._show_message('Connecting %s' % port)
-        ser = serial.Serial(port=port, baudrate=115200, timeout=2)
-        self._board = board_class(ser, close_on_terminate=True)
-        self._board.initialize()
-        self._show_message('Connected %s(%s)' % (board_class.__name__, port))
 
     def disconnect(self):
         if self._board is not None:
@@ -226,10 +190,9 @@ class DeviceManager(QtWidgets.QMainWindow):
     ###########################################################################
     # Configure board
     def _launch_config_dialog(self):
-        config = get_config_dialog(type(self._board).__name__)
-        self._board_config = config(
-            parent=self, num_channels=self._board.num_eeg)
-        self._board_config.set_configs(_get_config(self._board))
+        self._board_config = device_config.get_config_dialog(self._board, self)
+        self._board_config.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self._board_config.set_configs(self._board)
         self._board_config.applied.connect(self._configure_board)
         self._board_config.show()
 
@@ -237,12 +200,12 @@ class DeviceManager(QtWidgets.QMainWindow):
         self._board_config.setEnabled(False)
         self._set_channel_configs(configs['channel'])
         self._set_board_configs(configs['board'])
-        self._board_config.set_configs(_get_config(self._board))
+        self._board_config.set_configs(self._board)
         self._board_config.statusBar().showMessage('Configurations applied.')
         self._board_config.setEnabled(True)
 
     def _set_channel_configs(self, new_configs):
-        current_configs = _get_config(self._board)['channel']
+        current_configs = self._board_config.get_config(self._board)['channel']
         generator = enumerate(zip(current_configs, new_configs), start=1)
         for channel, (current_cfg, new_cfg) in generator:
             enabled, params = new_cfg['enabled'], new_cfg['parameters']
@@ -260,7 +223,7 @@ class DeviceManager(QtWidgets.QMainWindow):
     def _set_board_configs(self, configs):
         if self._board.streaming:
             return
-        current_configs = _get_config(self._board)['board']
+        current_configs = self._board_config.get_config(self._board)['board']
         if current_configs['board_mode'] != configs['board_mode']:
             self._board.set_board_mode(configs['board_mode'])
             time.sleep(0.1)
