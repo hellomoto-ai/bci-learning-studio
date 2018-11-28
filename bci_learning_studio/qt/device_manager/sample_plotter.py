@@ -17,7 +17,9 @@ class SamplePlotter(QtWidgets.QMainWindow):
         self.ui = Ui_SamplePlotter()
         self.ui.setupUi(self)
 
-        self._timer = None
+        self._timer = QtCore.QTimer()
+        self._timer.timeout.connect(self._plot)
+        self._timer.setInterval(100)
 
         self.history = history
         self._buffer = []
@@ -27,15 +29,11 @@ class SamplePlotter(QtWidgets.QMainWindow):
         qt_util.restore_window_position(self)
 
     def showEvent(self, event):
-        self._timer = qt_util.PeriodicCall(fps=8)
-        self._timer.elapsed.connect(self._plot)
         self._timer.start()
         event.accept()
 
     def hideEvent(self, event):
         self._timer.stop()
-        del self._timer
-        self._timer = None
         event.accept()
 
     def closeEvent(self, event):
