@@ -65,6 +65,7 @@ def _set_up():
             'pyqt5',
             'u-msgpack-python == 2.5.0',
             'openbci_interface',
+            'pyqtgraph',
         ],
         extras_require={
             'dev': [
@@ -72,6 +73,7 @@ def _set_up():
                 'flake8',
                 'flake8-print',
                 'pytest',
+                'pytest-qt',
                 'pytest-cov',
                 'pytest-mock',
             ],

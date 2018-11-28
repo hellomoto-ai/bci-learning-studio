@@ -13,6 +13,8 @@ jobs:
       - run:
           name: install dependencies
           command: |
+            sudo apt update
+            sudo apt install -y qt5-default
             python3 -m venv venv
             . venv/bin/activate
             pip install .[dev] codacy-coverage
@@ -25,7 +27,7 @@ jobs:
           command: |
             . venv/bin/activate
             mkdir test-repoorts
-            pytest \
+            xvfb-run pytest \
               --cov=bci_learning_studio \
               --cov-report xml:coverage.xml \
               --junitxml=test-reports/junit.xml \

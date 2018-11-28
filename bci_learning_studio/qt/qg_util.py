@@ -1,7 +1,7 @@
 import datetime
 
 import pyqtgraph
-from pyqtgraph.Qt import QtCore, QtGui
+from PyQt5 import QtCore
 
 
 def _int2dt(timestamp):
