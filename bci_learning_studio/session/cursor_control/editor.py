@@ -80,11 +80,9 @@ class Editor(QtWidgets.QMainWindow):
         geo = self.ui.cursorReplay.frameGeometry()
         rep_w, rep_h = geo.width(), geo.height()
         diff = (this_w - geo.width()) // 2
-        print(geo.width(), geo.height(), geo.x(), geo.y())
         self.ui.cursorReplay.setGeometry(diff, 0, rep_w, rep_h)
         self.update()
         geo = self.ui.cursorReplay.frameGeometry()
-        print(geo.width(), geo.height(), geo.x(), geo.y())
 
     ###########################################################################
     def _open_file(self, _):
@@ -125,7 +123,7 @@ class Editor(QtWidgets.QMainWindow):
         for i in range(16):
             x = [d['timestamp'] for d in self._eeg_data]
             y = [d['eeg'][i] for d in self._eeg_data]
-            line = plot.plot(x, y, pen=pyqtgraph.mkPen(color=(0, 0, 255), width=3))
+            plot.plot(x, y, pen=pyqtgraph.mkPen(color=(0, 0, 255), width=3))
             x_min = min(x_min, min(x))
             x_max = max(x_max, max(x))
             y_min = min(y_min, min(y))
@@ -133,7 +131,8 @@ class Editor(QtWidgets.QMainWindow):
         max_x_range = 1.1 * (x_max - x_min)
         min_x = x_max - max_x_range
         max_x = x_min + max_x_range
-        plot.getViewBox().setLimits(maxXRange=max_x_range, xMin=min_x, xMax=max_x)
+        plot.getViewBox().setLimits(
+            maxXRange=max_x_range, xMin=min_x, xMax=max_x)
         menu = plot.getMenu()
         # TODO: Add plot reaction
         grp = get_context_menus(menu, 16)
@@ -147,7 +146,8 @@ class Editor(QtWidgets.QMainWindow):
 
         for datum in self._target_data:
             plot.addLine(
-                x=datum['time'], pen=pyqtgraph.mkPen(color=(0, 128, 0), width=3),
+                x=datum['time'],
+                pen=pyqtgraph.mkPen(color=(0, 128, 0), width=3),
                 markers=[('o', 0.0, 10.0), ('o', 1.0, 10.0)],
             )
         self._bar = plot.addLine(
@@ -167,7 +167,8 @@ class Editor(QtWidgets.QMainWindow):
         cursor = self._get_cursor_data(timestamp)
         if cursor:
             self.ui.cursorReplay.set_cursor(x=cursor['x'], y=cursor['y'])
-            self.ui.cursorReplay.set_target(x=cursor['target_x'], y=cursor['target_y'])
+            self.ui.cursorReplay.set_target(
+                x=cursor['target_x'], y=cursor['target_y'])
             self.ui.cursorReplay.update()
 
     def _get_cursor_data(self, timestamp):
