@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 import datetime
 
@@ -7,14 +6,15 @@ from PyQt5 import QtCore, QtWidgets
 
 from bci_learning_studio.qt import qt_util
 from bci_learning_studio.qt.device_manager import DeviceManager
-from .main_window_ui import Ui_MainWindow
+from bci_learning_studio.qt.sample_serialization import SampleSerialization
+from .recorder_ui import Ui_Recorder
 
 _LG = logging.getLogger(__name__)
 
 
-def _ask_save_path():
+def _ask_save_path(parent):
     default_path = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S.json')
-    default_dir = qt_util.get_settings('default_save_path')
+    default_dir = qt_util.get_settings('default_save_dir')
     if default_dir:
         default_path = os.path.join(default_dir, default_path)
 
@@ -23,32 +23,28 @@ def _ask_save_path():
         QtWidgets.QFileDialog.DontUseNativeDialog
     )
     filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-        None, 'Select recording path', default_path, 'JSON (*.json)',
+        parent, 'Select recording path', default_path, 'JSON (*.json)',
         options=options)
 
-    qt_util.store_settings(default_save_path=os.path.dirname(filename))
+    if filename:
+        qt_util.store_settings(default_save_dir=os.path.dirname(filename))
     return filename
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class Recorder(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
 
-        self.ui = Ui_MainWindow()
+        self.ui = Ui_Recorder()
         self.ui.setupUi(self)
 
         self.ui.actionDevice.triggered.connect(self._show_device_manager)
         self.ui.actionRecord.triggered.connect(self._toggle_recording)
         self.ui.actionStart.triggered.connect(self._toggle_interaction)
         self.ui.cursorControl.stopped.connect(self._stop_interaction)
-        self.ui.cursorControl.acquired.connect(self._store_cursor)
 
         self._device_manager = DeviceManager(parent=self)
-
-        self._buffer = []
-        self._recording = False
-        self._save_path = None
-
+        self._serializer = None
         qt_util.restore_window_position(self)
 
     ###########################################################################
@@ -59,9 +55,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close()
 
     def closeEvent(self, event):
+        qt_util.store_window_position(self)
         self._device_manager.disconnect()
         self.ui.cursorControl.stop()
-        qt_util.store_window_position(self)
+        if self._serializer:
+            self._terminate_serializer()
+        self.parent().show()
         event.accept()
 
     ###########################################################################
@@ -88,35 +87,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.cursorControl.stop()
         self.ui.actionStart.setChecked(False)
         self.ui.actionStart.setText('Start')
-        if self._recording:
-            self._save()
-
-    def _store_cursor(self, value):
-        self._buffer.append(value)
 
     ###########################################################################
-    # Recording / save
+    # Recording / serialize
+    def _save_eeg(self, sample):
+        sample['type'] = 'eeg'
+        self._serializer.save(sample)
+
+    def _init_serializer(self, filename):
+        self._serializer = SampleSerialization(filename)
+        self.ui.cursorControl.acquired.connect(self._serializer.save)
+        self._device_manager.acquired.connect(self._save_eeg)
+
+    def _terminate_serializer(self):
+        self.ui.cursorControl.acquired.disconnect(self._serializer.save)
+        self._device_manager.acquired.disconnect(self._save_eeg)
+        self._serializer.close()
+        self._serializer = None
+
     def _toggle_recording(self, checked):
         if checked:
-            self._start_recording()
+            filename = _ask_save_path(self)
+            if filename:
+                self._init_serializer(filename)
+            else:
+                self.ui.actionRecord.setChecked(False)
         else:
-            self._stop_recording()
-
-    def _start_recording(self):
-        filename = _ask_save_path()
-        if not filename:  # user canneled.
-            self.ui.actionRecord.setChecked(False)
-            return
-        self._recording = True
-        self._save_path = filename
-
-    def _stop_recording(self):
-        self._recording = False
-        self._save_path = None
-
-    def _save(self):
-        _LG.info('Saving data %s', self._save_path)
-        with open(self._save_path, 'a') as fileobj:
-            for data in self._buffer:
-                json.dump(data, fileobj)
-                fileobj.write('\n')
+            self._terminate_serializer()

@@ -21,21 +21,15 @@ class PeriodicCall(QtCore.QThread):
 
 
 def store_window_position(window):
-    name = window.objectName()
-    settings = QtCore.QSettings()
-    settings.setValue('%s/geometry' % name, window.saveGeometry())
-    settings.setValue('%s/windowState' % name, window.saveState())
+    name = '%s/geometry' % window.objectName()
+    store_settings(**{name: window.saveGeometry()})
 
 
 def restore_window_position(window):
-    name = window.objectName()
-    settings = QtCore.QSettings()
-    val = settings.value('%s/geometry' % name)
+    name = '%s/geometry' % window.objectName()
+    val = get_settings(name)
     if val is not None:
         window.restoreGeometry(val)
-    val = settings.value('%s/windowState' % name)
-    if val is not None:
-        window.restoreState(val)
 
 
 def store_settings(**kwargs):

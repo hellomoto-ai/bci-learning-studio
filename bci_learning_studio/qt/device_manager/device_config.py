@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+import openbci_interface
 from .cyton_configuration_ui import Ui_CytonConfiguration
 
 
@@ -66,7 +67,6 @@ class CytonConfig(QtWidgets.QMainWindow):
 
     def __init__(self, parent, num_channels):
         super().__init__(parent=parent)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         self.ui = Ui_CytonConfiguration()
         self.ui.setupUi(self)
@@ -145,7 +145,8 @@ class CytonConfig(QtWidgets.QMainWindow):
             'channel': self._get_channel_configs(),
         }
 
-    def set_configs(self, configs):
+    def set_configs(self, board):
+        configs = self.get_config(board)
         self._set_channel_configs(configs['channel'])
         self._set_board_configs(configs['board'])
 
@@ -153,7 +154,31 @@ class CytonConfig(QtWidgets.QMainWindow):
         self.statusBar().showMessage('Applying configurations ...')
         self.applied.emit(self._get_configs())
 
+    @staticmethod
+    def get_config(board):
+        return {
+            'board': {
+                'board_mode': board.board_mode,
+                'sample_rate': board.sample_rate,
+            },
+            'channel': [
+                {
+                    'enabled': config.enabled,
+                    'parameters': {
+                        'power_down': config.power_down,
+                        'gain': config.gain,
+                        'input_type': config.input_type,
+                        'bias': config.bias,
+                        'srb2': config.srb2,
+                        'srb1': config.srb1,
+                    },
+                } for config in board.channel_configs
+            ],
+        }
 
-def get_config_dialog(boad_type):
-    if boad_type == 'Cyton':
-        return CytonConfig
+
+def get_config_dialog(board, parent):
+    if isinstance(board, openbci_interface.Cyton):
+        return CytonConfig(parent, num_channels=board.num_eeg)
+    raise NotImplementedError(
+        'Not supported; %s' % board.__class__.__name__)

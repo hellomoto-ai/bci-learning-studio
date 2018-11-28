@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/icon">
+    <file>resource/baseline-edit-24px.svg</file>
     <file>resource/baseline-games-24px.svg</file>
     <file>resource/baseline-show_chart-24px.svg</file>
     <file>resource/baseline-settings-20px.svg</file>
