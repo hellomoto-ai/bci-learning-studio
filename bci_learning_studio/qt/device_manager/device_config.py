@@ -17,7 +17,7 @@ def _init_table(table, num_channels):
         box = QtWidgets.QComboBox()
         for val in ['ON', 'OFF']:
             box.addItem(val, val)
-        box.setCurrentIndex(box.findData(val))
+        box.setCurrentIndex(box.findData('OFF'))
         table.setCellWidget(row, 1, box)
 
         box = QtWidgets.QComboBox()
@@ -75,7 +75,7 @@ class CytonConfig(QtWidgets.QMainWindow):
         self._init_ui()
 
         btn = self.ui.buttonBox.button(QtGui.QDialogButtonBox.Apply)
-        btn.clicked.connect(self.apply_clicked)
+        btn.clicked.connect(self._apply_clicked)
 
     def _init_ui(self):
         self._init_board_config_ui()
@@ -150,7 +150,7 @@ class CytonConfig(QtWidgets.QMainWindow):
         self._set_channel_configs(configs['channel'])
         self._set_board_configs(configs['board'])
 
-    def apply_clicked(self):
+    def _apply_clicked(self):
         self.statusBar().showMessage('Applying configurations ...')
         self.applied.emit(self._get_configs())
 
