@@ -29,9 +29,9 @@ class SampleAcquisitionThread(QtCore.QThread):
         # end byte while sample distribution over time is kind of smooth.
         cycle = self.wait_factor * self._board.cycle
         unit_wait = cycle / 10.0
-        last_acquired = time.time()
+        last_acquired = time.monotonic()
         while self._board.streaming:
-            now = time.time()
+            now = time.monotonic()
             if now - last_acquired < cycle:
                 self.sleep(unit_wait)
                 continue
@@ -39,9 +39,9 @@ class SampleAcquisitionThread(QtCore.QThread):
                 sample = self._board.read_sample()
                 if sample['valid']:
                     self.acquired.emit(sample)
+                last_acquired = now
             except serial.serialutil.SerialException:
                 _LG.info('Connection seems to be closed.')
             except Exception:  # pylint: disable=broad-except
                 _LG.exception('failed to fetch')
-            last_acquired = now
         _LG.info('Sample acquisition thread stopped.')
