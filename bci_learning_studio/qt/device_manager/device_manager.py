@@ -51,7 +51,6 @@ def _connect(device):
 
 
 class DeviceManager(QtWidgets.QMainWindow):
-    connected = QtCore.pyqtSignal(bool)
     streaming = QtCore.pyqtSignal(bool)
     acquired = QtCore.pyqtSignal('PyQt_PyObject')
 
@@ -87,9 +86,62 @@ class DeviceManager(QtWidgets.QMainWindow):
 
     def _show_message(self, message):
         self.statusBar().showMessage(message)
+        QtWidgets.QApplication.processEvents()
 
     ###########################################################################
     # Connect / Disconnect functions
+    def _toggle_connect(self, checked):
+        if checked:
+            self._launch_selector()
+        else:
+            if self._board.streaming:
+                if not self._user_confirms_disconnect():
+                    self.ui.actionConnect.setChecked(True)
+                    return
+            self.disconnect()
+
+    def _teardown_device_selector(self):
+        self._selector.close()
+        self._selector = None
+        self.ui.actionConnect.setChecked(False)
+
+    def _user_confirms_disconnect(self):
+        return _user_confirms(
+            self, 'Device Streaming', 'The device is streaming data. Proceed?',
+        )
+
+    def _launch_selector(self):
+        self._selector = DeviceSelector(parent=self)
+        self._selector.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self._selector.selected.connect(self._connect_board)
+        self._selector.rejected.connect(self._teardown_device_selector)
+        self._selector.show()
+
+    def _connect_board(self, device):
+        self._selector.hide()
+        self._show_message('Connecting %s' % device)
+        try:
+            self._board = _connect(device)
+        except Exception as error:  # pylint: disable=broad-except
+            _LG.exception('Failed to initialize device; %s', device)
+            self._selector.show()
+            self._show_message(str(error))
+            return
+        self._selector.close()
+        self._selector = None
+        self._show_message('Connected %s' % device)
+        self._set_ui_connected()
+
+    def disconnect(self):
+        if self._board is not None:
+            self._board.terminate()
+            self._show_message('Disconnected.')
+        if self._sample_acquisition is not None:
+            self._sample_acquisition.wait()
+            self._sample_acquisition = None
+        self._sample_plotter.close()
+        self._set_ui_disconnected()
+
     def _set_ui_connected(self):
         self.ui.actionConnect.setChecked(True)
         self.ui.actionConnect.setText('Disconnect')
@@ -106,53 +158,6 @@ class DeviceManager(QtWidgets.QMainWindow):
         self.ui.actionStream.setChecked(False)
         self.ui.actionStream.setText('Stream')
         self.ui.actionConfigure.setEnabled(False)
-
-    def _toggle_connect(self, checked):
-        if checked:
-            self._launch_selector()
-            self.ui.actionConnect.setChecked(False)
-            self.connected.emit(True)
-        else:
-            if self._board.streaming:
-                confirmed = _user_confirms(
-                    self, 'Device Streaming',
-                    'The device is streaming data. Proceed?',
-                )
-                if not confirmed:
-                    self.ui.actionConnect.setChecked(True)
-                    return
-            self.disconnect()
-            self.connected.emit(False)
-
-    def _launch_selector(self):
-        self._selector = DeviceSelector(parent=self)
-        self._selector.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self._selector.selected.connect(self._connect_board)
-        self._selector.show()
-
-    def _connect_board(self, device):
-        self._selector.hide()
-        self._show_message('Connecting %s' % device)
-        try:
-            self._board = _connect(device)
-        except Exception as error:  # pylint: disable=broad-except
-            self._show_message(str(error))
-            _LG.exception('Failed to initialize device; %s', device)
-            self._selector.show()
-            return
-        self._show_message('Connected %s' % device)
-        self._selector.close()
-        self._set_ui_connected()
-
-    def disconnect(self):
-        if self._board is not None:
-            self._board.terminate()
-            self._show_message('Disconnected.')
-        if self._sample_acquisition is not None:
-            self._sample_acquisition.wait()
-            self._sample_acquisition = None
-        self._sample_plotter.close()
-        self._set_ui_disconnected()
 
     ###########################################################################
     # Stream / Stop functions
