@@ -97,24 +97,12 @@ class CytonConfig(QtWidgets.QMainWindow):
     def _init_channel_config_ui(self):
         _init_table(self.ui.channelConfig_Table, self.num_channels)
 
-    def _set_channel_configs(self, channel_configs):
+    def _get_configs(self):
         widget = self.ui.channelConfig_Table.cellWidget
-        keys = [
-            'power_down', 'gain', 'input_type', 'bias', 'srb2', 'srb1'
-        ]
-        for row, config in enumerate(channel_configs):
-            widget(row, 0).setChecked(config['enabled'])
-            for col, key in enumerate(keys, start=1):
-                box = widget(row, col)
-                index = box.findData(config['parameters'][key])
-                if index >= 0:
-                    box.setCurrentIndex(index)
-
-    def _get_channel_configs(self):
-        ret = []
-        widget = self.ui.channelConfig_Table.cellWidget
-        for row in range(self.num_channels):
-            ret.append({
+        return {
+            'board_mode': self.ui.boardMode_ComboBox.currentData(),
+            'sample_rate': self.ui.sampleRate_ComboBox.currentData(),
+            'channels': [{
                 'enabled': widget(row, 0).isChecked(),
                 'parameters': {
                     'power_down': widget(row, 1).currentData(),
@@ -124,57 +112,30 @@ class CytonConfig(QtWidgets.QMainWindow):
                     'srb2': widget(row, 5).currentData(),
                     'srb1': widget(row, 6).currentData(),
                 },
-            })
-        return ret
-
-    def _get_board_configs(self):
-        return {
-            'board_mode': self.ui.boardMode_ComboBox.currentData(),
-            'sample_rate': self.ui.sampleRate_ComboBox.currentData(),
+            } for row in range(self.num_channels)]
         }
 
-    def _set_board_configs(self, board_configs):
+    def set_config(self, config):
         box = self.ui.boardMode_ComboBox
-        box.setCurrentIndex(box.findData(board_configs['board_mode']))
+        box.setCurrentIndex(box.findData(config['board_mode']))
         box = self.ui.sampleRate_ComboBox
-        box.setCurrentIndex(box.findData(board_configs['sample_rate']))
+        box.setCurrentIndex(box.findData(config['sample_rate']))
 
-    def _get_configs(self):
-        return {
-            'board': self._get_board_configs(),
-            'channel': self._get_channel_configs(),
-        }
-
-    def set_configs(self, board):
-        configs = self.get_config(board)
-        self._set_channel_configs(configs['channel'])
-        self._set_board_configs(configs['board'])
+        widget = self.ui.channelConfig_Table.cellWidget
+        keys = [
+            'power_down', 'gain', 'input_type', 'bias', 'srb2', 'srb1'
+        ]
+        for row, cfg in enumerate(config['channels']):
+            widget(row, 0).setChecked(cfg['enabled'])
+            for col, key in enumerate(keys, start=1):
+                box = widget(row, col)
+                index = box.findData(cfg['parameters'][key])
+                if index >= 0:
+                    box.setCurrentIndex(index)
 
     def _apply_clicked(self):
         self.statusBar().showMessage('Applying configurations ...')
         self.applied.emit(self._get_configs())
-
-    @staticmethod
-    def get_config(board):
-        return {
-            'board': {
-                'board_mode': board.board_mode,
-                'sample_rate': board.sample_rate,
-            },
-            'channel': [
-                {
-                    'enabled': config.enabled,
-                    'parameters': {
-                        'power_down': config.power_down,
-                        'gain': config.gain,
-                        'input_type': config.input_type,
-                        'bias': config.bias,
-                        'srb2': config.srb2,
-                        'srb1': config.srb1,
-                    },
-                } for config in board.channel_configs
-            ],
-        }
 
 
 def get_config_dialog(board, parent):

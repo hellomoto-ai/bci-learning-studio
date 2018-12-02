@@ -197,24 +197,29 @@ class DeviceManager(QtWidgets.QMainWindow):
     def _launch_config_dialog(self):
         self._board_config = device_config.get_config_dialog(self._board, self)
         self._board_config.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self._board_config.set_configs(self._board)
+        self._board_config.set_config(self._board.export_config())
         self._board_config.applied.connect(self._configure_board)
         self._board_config.show()
 
     def _configure_board(self, configs):
         self._board_config.setEnabled(False)
-        self._set_channel_configs(configs['channel'])
-        self._set_board_configs(configs['board'])
-        self._board_config.set_configs(self._board)
+        self._set_board_configs(configs)
+        self._board_config.set_config(self._board.export_config())
         self._board_config.statusBar().showMessage('Configurations applied.')
         self._board_config.setEnabled(True)
 
-    def _set_channel_configs(self, new_configs):
-        current_configs = self._board_config.get_config(self._board)['channel']
-        generator = enumerate(zip(current_configs, new_configs), start=1)
-        for channel, (current_cfg, new_cfg) in generator:
+    def _set_board_configs(self, configs):
+        current_configs = self._board.export_config()
+        if self._board.streaming:
+            if current_configs['board_mode'] != configs['board_mode']:
+                self._board.set_board_mode(configs['board_mode'])
+                time.sleep(0.1)
+            if current_configs['sample_rate'] != configs['sample_rate']:
+                self._board.set_sample_rate(configs['sample_rate'])
+                time.sleep(0.1)
+        generator = zip(current_configs['channels'], configs['channels'])
+        for channel, (current_cfg, new_cfg) in enumerate(generator, start=1):
             enabled, params = new_cfg['enabled'], new_cfg['parameters']
-
             if current_cfg['enabled'] != enabled and enabled:
                 self._board.enable_channel(channel)
                 time.sleep(0.1)
@@ -224,14 +229,3 @@ class DeviceManager(QtWidgets.QMainWindow):
             if current_cfg['enabled'] != enabled and not enabled:
                 self._board.disable_channel(channel)
                 time.sleep(0.1)
-
-    def _set_board_configs(self, configs):
-        if self._board.streaming:
-            return
-        current_configs = self._board_config.get_config(self._board)['board']
-        if current_configs['board_mode'] != configs['board_mode']:
-            self._board.set_board_mode(configs['board_mode'])
-            time.sleep(0.1)
-        if current_configs['sample_rate'] != configs['sample_rate']:
-            self._board.set_sample_rate(configs['sample_rate'])
-            time.sleep(0.1)

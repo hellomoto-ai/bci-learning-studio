@@ -3,9 +3,10 @@ from bci_learning_studio.qt.device_manager import device_config
 
 
 def _get_default_values(num_channels):
-    return [{
-        'board': {'board_mode': 'default', 'sample_rate': 250},
-        'channel': [
+    return {
+        'board_mode': 'default',
+        'sample_rate': 250,
+        'channels': [
             {
                 'enabled': True,
                 'parameters': {
@@ -15,7 +16,7 @@ def _get_default_values(num_channels):
                 },
             }
         ] * num_channels
-    }]
+    }
 
 
 def test_cyton_config(qtbot):
@@ -60,4 +61,4 @@ def test_cyton_config(qtbot):
     with qtbot.waitSignal(cyton_config.applied, timeout=1000) as blocker:
         apply_button = cyton_config.ui.buttonBox.buttons()[0]
         qtbot.mouseClick(apply_button, QtCore.Qt.LeftButton)
-    assert blocker.args == default_data
+    assert blocker.args == [default_data]
