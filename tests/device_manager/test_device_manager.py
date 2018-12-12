@@ -4,6 +4,8 @@ from PyQt5 import QtWidgets
 
 from bci_learning_studio.qt.device_manager import device_manager
 
+from . import conftest
+
 # pylint: disable=protected-access
 
 
@@ -112,3 +114,28 @@ def test_disconnect(qtbot, mocker):
     assert not manager.ui.actionConfigure.isEnabled()
     assert not manager.ui.actionConfigure.isChecked()
     assert manager.ui.actionConfigure.text() == 'Configure'
+
+
+def test_configure(qtbot, mocker):
+    """Disconnect sets Connect/Stream/Configure state correctly."""
+    class Cyton:
+        num_eeg = 16
+        board_info = '''OpenBCI V3 8-16 channel
+On Board ADS1299 Device ID: 0x3E
+On Daisy ADS1299 Device ID: 0x3E
+LIS3DH Device ID: 0x33
+Firmware: v3.1.1
+$$$'''
+        def get_config(self):
+            return conftest.get_default_channel_configs(self.num_eeg)
+
+    def _connect(device):
+        if device == 'Cyton':
+            return Cyton()
+
+    mocker.patch.object(device_manager, '_connect', _connect)
+    manager = _get_manager(qtbot)
+
+    manager.ui.actionConnect.activate(QtWidgets.QAction.Trigger)
+    manager._selector.selected.emit('Cyton')
+    manager.ui.actionConfigure.activate(QtWidgets.QAction.Trigger)

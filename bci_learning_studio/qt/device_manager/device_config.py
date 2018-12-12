@@ -1,6 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import openbci_interface
 from .cyton_configuration_ui import Ui_CytonConfiguration
 
 
@@ -139,7 +138,7 @@ class CytonConfig(QtWidgets.QMainWindow):
 
 
 def get_config_dialog(board, parent):
-    if isinstance(board, openbci_interface.Cyton):
+    if board.__class__.__name__ == 'Cyton':
         return CytonConfig(parent, num_channels=board.num_eeg)
     raise NotImplementedError(
         'Not supported; %s' % board.__class__.__name__)

@@ -1,22 +1,7 @@
 from PyQt5 import QtCore
 from bci_learning_studio.qt.device_manager import device_config
 
-
-def _get_default_values(num_channels):
-    return {
-        'board_mode': 'default',
-        'sample_rate': 250,
-        'channels': [
-            {
-                'enabled': True,
-                'parameters': {
-                    'power_down': 'OFF',
-                    'gain': 24, 'input_type': 'NORMAL',
-                    'bias': 1, 'srb2': 1, 'srb1': 0,
-                },
-            }
-        ] * num_channels
-    }
+from . import conftest
 
 
 def test_cyton_config(qtbot):
@@ -57,7 +42,7 @@ def test_cyton_config(qtbot):
         assert cells(row, 6).currentData() == 0
 
     # Check emitted values
-    default_data = _get_default_values(num_channels)
+    default_data = conftest.get_default_channel_configs(num_channels)
     with qtbot.waitSignal(cyton_config.applied, timeout=1000) as blocker:
         apply_button = cyton_config.ui.buttonBox.buttons()[0]
         qtbot.mouseClick(apply_button, QtCore.Qt.LeftButton)
