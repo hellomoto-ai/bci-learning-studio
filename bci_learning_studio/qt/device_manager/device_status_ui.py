@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './bci_learning_studio/qt/device_status_ui.ui'
+# Form implementation generated from reading ui file './bci_learning_studio/qt/device_manager/device_status_ui.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #

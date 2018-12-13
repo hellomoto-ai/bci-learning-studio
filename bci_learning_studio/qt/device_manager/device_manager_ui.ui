@@ -80,7 +80,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="bci_learning_studio.qt.resource.qrc">
+    <iconset resource="../bci_learning_studio.qt.resource.qrc">
      <normaloff>:/icon/resource/baseline-phonelink-24px.svg</normaloff>
      <normalon>:/icon/resource/baseline-phonelink_off-24px.svg</normalon>:/icon/resource/baseline-phonelink-24px.svg</iconset>
    </property>
@@ -93,7 +93,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="bci_learning_studio.qt.resource.qrc">
+    <iconset resource="../bci_learning_studio.qt.resource.qrc">
      <normaloff>:/icon/resource/baseline-play_arrow-24px.svg</normaloff>
      <normalon>:/icon/resource/baseline-stop-24px.svg</normalon>:/icon/resource/baseline-play_arrow-24px.svg</iconset>
    </property>
@@ -103,7 +103,7 @@
   </action>
   <action name="actionConfigure">
    <property name="icon">
-    <iconset resource="bci_learning_studio.qt.resource.qrc">
+    <iconset resource="../bci_learning_studio.qt.resource.qrc">
      <normaloff>:/icon/resource/baseline-settings-20px.svg</normaloff>:/icon/resource/baseline-settings-20px.svg</iconset>
    </property>
    <property name="text">
@@ -112,7 +112,7 @@
   </action>
   <action name="actionPlot">
    <property name="icon">
-    <iconset resource="bci_learning_studio.qt.resource.qrc">
+    <iconset resource="../bci_learning_studio.qt.resource.qrc">
      <normaloff>:/icon/resource/baseline-show_chart-24px.svg</normaloff>:/icon/resource/baseline-show_chart-24px.svg</iconset>
    </property>
    <property name="text">
@@ -135,7 +135,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="bci_learning_studio.qt.resource.qrc"/>
+  <include location="../bci_learning_studio.qt.resource.qrc"/>
  </resources>
  <connections/>
 </ui>
