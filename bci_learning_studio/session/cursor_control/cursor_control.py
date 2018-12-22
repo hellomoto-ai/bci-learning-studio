@@ -74,6 +74,8 @@ class CursorControl(QtWidgets.QWidget):
     def start(self):
         self._manager.reset_cursor()
         self._manager.reset_target()
+        self._emit('target')
+        self._emit('cursor')
         self._tracker.activate()
         self._n_trials = 10
         self.update()
