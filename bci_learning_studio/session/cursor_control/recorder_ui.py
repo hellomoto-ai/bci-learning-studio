@@ -17,7 +17,6 @@ class Ui_Recorder(object):
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
         self.cursorControl = CursorControl(self.centralwidget)
-        self.cursorControl.setStyleSheet("background-color:rgb(255, 255, 255);border:1px solid rgb(00, 00, 00);")
         self.cursorControl.setObjectName("cursorControl")
         self.verticalLayout.addWidget(self.cursorControl)
         Recorder.setCentralWidget(self.centralwidget)
