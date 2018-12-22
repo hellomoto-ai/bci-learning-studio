@@ -102,18 +102,22 @@ class CursorControl(QtWidgets.QWidget):
         if type_ == 'target':
             self.acquired.emit({
                 'type': type_,
-                'time': time.time(),
-                'x': self._manager.target.x,
-                'y': self._manager.target.y,
+                'data': {
+                    'time': time.time(),
+                    'x': self._manager.target.x,
+                    'y': self._manager.target.y,
+                },
             })
         elif type_ == 'cursor':
             self.acquired.emit({
                 'type': type_,
-                'time': time.time(),
-                'x': self._manager.cursor.x,
-                'y': self._manager.cursor.y,
-                'target_x': self._manager.target.x,
-                'target_y': self._manager.target.y,
+                'data': {
+                    'time': time.time(),
+                    'x': self._manager.cursor.x,
+                    'y': self._manager.cursor.y,
+                    'target_x': self._manager.target.x,
+                    'target_y': self._manager.target.y,
+                },
             })
 
     ###########################################################################

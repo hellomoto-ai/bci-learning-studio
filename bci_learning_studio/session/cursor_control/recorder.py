@@ -91,8 +91,7 @@ class Recorder(QtWidgets.QMainWindow):
     ###########################################################################
     # Recording / serialize
     def _save_eeg(self, sample):
-        sample['type'] = 'eeg'
-        self._serializer.save(sample)
+        self._serializer.save({'type': 'eeg', 'data': sample})
 
     def _init_serializer(self, filename):
         self._serializer = SampleSerialization(filename)

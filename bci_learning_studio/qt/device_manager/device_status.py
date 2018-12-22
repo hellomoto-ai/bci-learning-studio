@@ -41,11 +41,11 @@ class DeviceStatus(QtWidgets.QWidget):
 
     def tick(self, sample):
         """Add sample timestamp to buffer and update sample rate label"""
-        latest = sample['timestamp']
+        latest = sample['data']['timestamp']
         self._buffer.append(latest)
         self._buffer = self._buffer[-1000:]
 
-        self._update_indicator(sample['raw_eeg'])
+        self._update_indicator(sample['data']['raw_eeg'])
 
         if latest - self._last_update > 0.1 and len(self._buffer) > 10:
             sample_rate = (len(self._buffer) - 1) / (latest - self._buffer[0])
