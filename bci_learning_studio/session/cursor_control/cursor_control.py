@@ -30,15 +30,25 @@ class _Tracker:
     def stop_tracking(self):
         self.tracking = False
 
+    def _get_mouse_coord(self, event):
+        if self.width > self.height:
+            x_ = event.x() - (self.width - self.height) / 2
+            y_ = event.y()
+        else:
+            x_ = event.x()
+            y_ = event.y() - (self.height - self.width) / 2
+        side = min(self.width, self.height)
+        return Point2D(x_ / side, y_ / side)
+
     def process_press_event(self, event, geometry):
         self.width, self.height = geometry.width(), geometry.height()
 
-        mouse = Point2D(event.x() / self.width, event.y() / self.height)
+        mouse = self._get_mouse_coord(event)
         if abs(self.cursor_manager.cursor - mouse) < 0.05:
             self.start_tracking(mouse)
 
     def process_move_event(self, event):
-        mouse = Point2D(event.x() / self.width, event.y() / self.height)
+        mouse = self._get_mouse_coord(event)
         cursor = self._pos0['cursor'] + mouse - self._pos0['mouse']
         self.cursor_manager.update_cursor(cursor.x, cursor.y)
 
