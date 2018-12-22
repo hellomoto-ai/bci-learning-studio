@@ -52,7 +52,7 @@ class SamplePlotter(QtWidgets.QMainWindow):
         self.ui.graphWidget.clear()
 
     def append(self, sample):
-        eeg = sample['eeg']
+        eeg = sample['data']['eeg']
         if len(self._buffer) != len(eeg):
             self._buffer = [[0.0] * self.history] * len(eeg)
 

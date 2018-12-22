@@ -95,18 +95,13 @@ class Editor(QtWidgets.QMainWindow):
         self._eeg_data = []
         self._cursor_data = []
         self._target_data = []
-        target_x, target_y = 0.0, 0.0
         for datum in data:
-            if 'eeg' in datum:
-                self._eeg_data.append(datum)
+            if datum['type'] == 'eeg':
+                self._eeg_data.append(datum['data'])
             elif datum['type'] == 'cursor':
-                datum['target_x'] = target_x
-                datum['target_y'] = target_y
-                self._cursor_data.append(datum)
+                self._cursor_data.append(datum['data'])
             elif datum['type'] == 'target':
-                self._target_data.append(datum)
-                target_x = datum['x']
-                target_y = datum['y']
+                self._target_data.append(datum['data'])
         self._plot()
 
     def _plot(self):

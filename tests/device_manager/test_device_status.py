@@ -25,8 +25,11 @@ def test_device_status(qtbot):
         diff = 1 / sample_rate
         for _ in range(5000):
             sample = {
-                'timestamp': timestamp,
-                'raw_eeg': [],
+                'type': 'eeg',
+                'data': {
+                    'timestamp': timestamp,
+                    'raw_eeg': [],
+                },
             }
             status.tick(sample)
             timestamp += diff
@@ -40,8 +43,11 @@ def test_device_status(qtbot):
         for sign in [1, -1]:
             raw_eeg[0] = sign * val
             sample = {
-                'timestamp': 0,
-                'raw_eeg': raw_eeg,
+                'type': 'eeg',
+                'data': {
+                    'timestamp': 0,
+                    'raw_eeg': raw_eeg,
+                },
             }
             status.tick(sample)
             assert indicator._status == measurement_status_indicator._RAILED
@@ -51,8 +57,11 @@ def test_device_status(qtbot):
         for sign in [1, -1]:
             raw_eeg[0] = sign * val
             sample = {
-                'timestamp': 0,
-                'raw_eeg': raw_eeg,
+                'type': 'eeg',
+                'data': {
+                    'timestamp': 0,
+                    'raw_eeg': raw_eeg,
+                },
             }
             status.tick(sample)
             assert indicator._status == measurement_status_indicator._NEAR_RAILED
@@ -62,8 +71,11 @@ def test_device_status(qtbot):
         for sign in [1, -1]:
             raw_eeg[0] = sign * val
             sample = {
-                'timestamp': 0,
-                'raw_eeg': raw_eeg,
+                'type': 'eeg',
+                'data': {
+                    'timestamp': 0,
+                    'raw_eeg': raw_eeg,
+                },
             }
             status.tick(sample)
             assert indicator._status == measurement_status_indicator._OK

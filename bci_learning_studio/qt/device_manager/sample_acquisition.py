@@ -38,7 +38,7 @@ class SampleAcquisitionThread(QtCore.QThread):
             try:
                 sample = self._board.read_sample()
                 if sample['valid']:
-                    self.acquired.emit(sample)
+                    self.acquired.emit({'type': 'eeg', 'data': sample})
                 last_acquired = now
             except serial.serialutil.SerialException:
                 _LG.info('Connection seems to be closed.')
