@@ -90,17 +90,14 @@ class Recorder(QtWidgets.QMainWindow):
 
     ###########################################################################
     # Recording / serialize
-    def _save_eeg(self, sample):
-        self._serializer.save({'type': 'eeg', 'data': sample})
-
     def _init_serializer(self, filename):
         self._serializer = SampleSerialization(filename)
         self.ui.cursorControl.acquired.connect(self._serializer.save)
-        self._device_manager.acquired.connect(self._save_eeg)
+        self._device_manager.acquired.connect(self._serializer.save)
 
     def _terminate_serializer(self):
         self.ui.cursorControl.acquired.disconnect(self._serializer.save)
-        self._device_manager.acquired.disconnect(self._save_eeg)
+        self._device_manager.acquired.disconnect(self._serializer.save)
         self._serializer.close()
         self._serializer = None
 
