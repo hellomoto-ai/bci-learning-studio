@@ -65,6 +65,7 @@ def _set_up():
             'pyqt5',
             'u-msgpack-python == 2.5.0',
             'openbci_interface',
+            'scipy >= 1.2.0',
             'pyqtgraph',
         ],
         extras_require={

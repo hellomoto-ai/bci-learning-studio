@@ -38,6 +38,7 @@ class SampleAcquisitionThread(QtCore.QThread):
             try:
                 sample = self._board.read_sample()
                 if sample['valid']:
+                    sample['sampling_rate'] = self._board.sample_rate
                     self.acquired.emit({'type': 'eeg', 'data': sample})
                 last_acquired = now
             except serial.serialutil.SerialException:
