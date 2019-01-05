@@ -59,7 +59,7 @@ class ViewerWidget(QtWidgets.QWidget):
 
     def _launch_filter_config(self):
         self._filter_params_prev = self._filter_params
-        self._filter_designer = FilterDesigner()
+        self._filter_designer = FilterDesigner(parent=self)
         self._filter_designer.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self._filter_designer.changed.connect(self._update_plot)
         self._filter_designer.rejected.connect(self._set_previous_filter)
