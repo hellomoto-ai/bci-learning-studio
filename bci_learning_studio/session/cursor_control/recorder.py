@@ -60,7 +60,8 @@ class Recorder(QtWidgets.QMainWindow):
         self.ui.cursorControl.stop()
         if self._serializer:
             self._terminate_serializer()
-        self.parent().show()
+        if self.parent():
+            self.parent().show()
         event.accept()
 
     ###########################################################################

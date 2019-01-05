@@ -83,7 +83,8 @@ class Editor(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         qt_util.store_window_position(self)
-        self.parent().show()
+        if self.parent():
+            self.parent().show()
         event.accept()
 
     def _center_replay(self):
