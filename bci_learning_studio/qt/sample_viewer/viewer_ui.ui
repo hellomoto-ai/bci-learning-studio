@@ -46,7 +46,7 @@
     </layout>
    </item>
    <item>
-    <widget class="PlotterWidget" name="plotter" native="true">
+    <widget class="GraphicsView" name="plotter" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -59,9 +59,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotterWidget</class>
+   <class>GraphicsView</class>
    <extends>QWidget</extends>
-   <header>.plotter</header>
+   <header>pyqtgraph</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -57,6 +57,7 @@ class FilterDesigner(QtWidgets.QDialog):
         x, y = _get_plot(filter_params)
 
         self.ui.plotter.clear()
+        self.ui.plotter.setBackground('w')
         self.ui.plotter.plot(x, y, pen=pg.mkPen('k', width=2))
         self.ui.plotter.setMouseEnabled(False, False)
         self.ui.plotter.showGrid(x=True, y=True)

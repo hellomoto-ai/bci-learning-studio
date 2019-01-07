@@ -25,7 +25,7 @@ class Ui_viewer(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.plotter = PlotterWidget(viewer)
+        self.plotter = GraphicsView(viewer)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -43,4 +43,4 @@ class Ui_viewer(object):
         self.configureFilter.setText(_translate("viewer", "Configure Filter"))
         self.clearFilter.setText(_translate("viewer", "Clear Filter"))
 
-from .plotter import PlotterWidget
+from pyqtgraph import GraphicsView
