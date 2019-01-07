@@ -66,6 +66,7 @@ class Editor(QtWidgets.QMainWindow):
         self.ui = Ui_Editor()
         self.ui.setupUi(self)
 
+        self.ui.viewer.init_plotter(interactive=True)
         self.ui.actionOpen.triggered.connect(self._open_file)
 
         qt_util.restore_window_position(self)

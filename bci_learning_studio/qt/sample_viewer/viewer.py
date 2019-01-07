@@ -2,6 +2,7 @@ import scipy.signal
 from PyQt5 import QtWidgets, QtCore
 
 from .viewer_ui import Ui_viewer
+from . import plotter as plotter_module
 from .filter_designer import FilterDesigner
 
 
@@ -29,6 +30,10 @@ class ViewerWidget(QtWidgets.QWidget):
 
         self.ui.configureFilter.clicked.connect(self._launch_filter_config)
         self.ui.clearFilter.clicked.connect(self._clear_filter)
+        self.ui.plotter.setBackground('w')
+
+        self.interactive = None
+        self._plotter = None
 
         self._eeg_data = None
         self._event_data = None
@@ -36,6 +41,14 @@ class ViewerWidget(QtWidgets.QWidget):
         self._filter_params = None
         self._filter_params_prev = None
         self._filter_designer = None
+
+    def init_plotter(self, interactive):
+        self.interactive = interactive
+        self._plotter = (
+            plotter_module.InteractivePlotterWidget() if interactive else
+            plotter_module.PlotterWidget()
+        )
+        self.ui.plotter.setCentralItem(self._plotter)
 
     def plot(self, eeg_data, event_data=None):
         self._eeg_data = eeg_data
@@ -49,10 +62,11 @@ class ViewerWidget(QtWidgets.QWidget):
         if self._filter_params:
             ys = _apply_filter(
                 ys, self._filter_params, self._eeg_data['sample_rate'])
-        self.ui.plotter.setData(x, ys)
+        self._plotter.setData(x, ys)
         if self._event_data:
-            self.ui.plotter.plot_event(self._event_data['timestamps'])
-        self.ui.plotter.seek_bar_dragged.connect(self._seek_bar_dragged)
+            self._plotter.plot_event(self._event_data['timestamps'])
+        if self.interactive:
+            self._plotter.seek_bar_dragged.connect(self._seek_bar_dragged)
 
     def _seek_bar_dragged(self, x):
         self.seek_bar_dragged.emit(x)
