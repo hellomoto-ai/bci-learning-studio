@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SamplePlotter</class>
- <widget class="QMainWindow" name="SamplePlotter">
+ <class>SampleViewer</class>
+ <widget class="QMainWindow" name="SampleViewer">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="GraphicsLayoutWidget" name="graphWidget" native="true"/>
+     <widget class="ViewerWidget" name="viewer" native="true"/>
     </item>
    </layout>
   </widget>
@@ -24,9 +24,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>GraphicsLayoutWidget</class>
+   <class>ViewerWidget</class>
    <extends>QWidget</extends>
-   <header>pyqtgraph</header>
+   <header>bci_learning_studio.qt.sample_viewer.viewer</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
