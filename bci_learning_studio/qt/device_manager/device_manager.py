@@ -10,7 +10,7 @@ from .device_manager_ui import Ui_DeviceManager
 from .device_selector import DeviceSelector
 from . import device_config
 from .sample_acquisition import SampleAcquisitionThread
-from .sample_plotter import SamplePlotter
+from .sample_viewer import SampleViewer
 
 _LG = logging.getLogger(__name__)
 
@@ -63,9 +63,9 @@ class DeviceManager(QtWidgets.QMainWindow):
         self.ui.actionConnect.triggered.connect(self._toggle_connect)
         self.ui.actionStream.triggered.connect(self._toggle_stream)
         self.ui.actionConfigure.triggered.connect(self._launch_config_dialog)
-        self.ui.actionPlot.triggered.connect(self._show_sample_plotter)
+        self.ui.actionPlot.triggered.connect(self._show_sample_viewer)
 
-        self._sample_plotter = SamplePlotter(parent=self)
+        self._sample_viewer = SampleViewer(parent=self)
 
         self._set_ui_disconnected()
         self._board = None
@@ -139,7 +139,7 @@ class DeviceManager(QtWidgets.QMainWindow):
         if self._sample_acquisition is not None:
             self._sample_acquisition.wait()
             self._sample_acquisition = None
-        self._sample_plotter.close()
+        self._sample_viewer.close()
         self._set_ui_disconnected()
 
     def _set_ui_connected(self):
@@ -173,24 +173,24 @@ class DeviceManager(QtWidgets.QMainWindow):
         self._board.stop_streaming()
         self._sample_acquisition.wait()
         self._sample_acquisition = None
-        self._sample_plotter.reset()
+        self._sample_viewer.reset()
         self.ui.actionStream.setText('Stream')
 
     def _start_streaming(self):
         self._sample_acquisition = SampleAcquisitionThread(self._board)
         self._sample_acquisition.acquired.connect(self.acquired.emit)
         self._sample_acquisition.acquired.connect(self.ui.deviceStatus.tick)
-        self._sample_acquisition.acquired.connect(self._sample_plotter.append)
+        self._sample_acquisition.acquired.connect(self._sample_viewer.append)
         self._board.start_streaming()
         self._sample_acquisition.start()
         self.ui.actionStream.setText('Stop')
 
     ###########################################################################
     # Plot window show/hide
-    def _show_sample_plotter(self):
+    def _show_sample_viewer(self):
         # To bring to front, hide once
-        self._sample_plotter.hide()
-        self._sample_plotter.show()
+        self._sample_viewer.hide()
+        self._sample_viewer.show()
 
     ###########################################################################
     # Configure board
