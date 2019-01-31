@@ -148,6 +148,7 @@ def _create_plots(
 
 
 class _MouseHandler:
+    """Process MouseEvents"""
     def __init__(self, controller):
         self._ctrl = controller
 
@@ -170,17 +171,17 @@ class _MouseHandler:
             self._viewbox_clicked = None
             self._seek_bar_drag = False
 
-    def _is_seek_bar_clicked(self, event, picked):
-        s_ev = vispy.scene.events.SceneMouseEvent(event=event, visual=picked)
-        seek_bar = self._ctrl.seek_bars[self._ctrl.viewboxes.index(picked)]
-        pos = picked.camera.transform.map(np.asarray([seek_bar.pos, 0, 0, 1]))
+    def _is_seek_bar_clicked(self, event, viewbox):
+        s_ev = vispy.scene.events.SceneMouseEvent(event=event, visual=viewbox)
+        seek_bar = self._ctrl.seek_bars[self._ctrl.viewboxes.index(viewbox)]
+        pos = viewbox.camera.transform.map(np.asarray([seek_bar.pos, 0, 0, 1]))
         return abs(pos[0] - s_ev.pos[0]) < 3
 
     def _drag_seek_bar(self, event):
-        scene_event = vispy.scene.events.SceneMouseEvent(
-            event=event, visual=self._viewbox_clicked)
-        coord = self._viewbox_clicked.camera.transform.imap(scene_event.pos)
-        self._ctrl.set_seek_bar(coord[0])
+        viewbox = self._viewbox_clicked
+        s_ev = vispy.scene.events.SceneMouseEvent(event=event, visual=viewbox)
+        pos = viewbox.camera.transform.imap(s_ev.pos)
+        self._ctrl.set_seek_bar(pos[0])
 
     def _pan(self, event, previous_event):
         pos1, pos2 = event.pos, previous_event.pos
@@ -197,15 +198,15 @@ class Plotter(vispy.scene.SceneCanvas):
         self.n_plots = n_plots
         self.interactive = interactive
 
-        self._controller = _create_plots(n_plots, self.central_widget, interactive)
-        self._mouse_handler = _MouseHandler(self._controller)
+        self._ctrl = _create_plots(n_plots, self.central_widget, interactive)
+        self._mouse_handler = _MouseHandler(self._ctrl)
         self.central_widget.padding = 15
 
     def reset_range(self):
-        self._controller.reset_range()
+        self._ctrl.reset_range()
 
     def set_data(self, x, ys):
-        self._controller.set_data(x, ys)
+        self._ctrl.set_data(x, ys)
 
     def _process_mouse_event(self, event):
         if self.interactive:
@@ -230,45 +231,36 @@ class PlotterWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.plotter = None
+        self._plotter = None
         self._eeg_data = None
-        self._event_data = None
         self._filter_params = None
 
     def initialize(self, n_plots, interactive):
-        self.plotter = _make_plotter(self, n_plots, interactive)
+        self._plotter = _make_plotter(self, n_plots, interactive)
 
     @property
     def filter_params(self):
         return copy.deepcopy(self._filter_params)
 
-    def set_data(self, eeg_data, event_data=None):
+    def set_data(self, eeg_data):
         self._eeg_data = eeg_data
-        self._event_data = event_data
         self._update_plot()
 
     def set_filter(self, filter_params):
         self._filter_params = filter_params
-        self._update_plot()
+        if self._eeg_data:
+            self._update_plot()
 
     def reset_range(self):
-        self.plotter.reset_range()
+        self._plotter.reset_range()
 
     def _update_plot(self):
-        if self._eeg_data:
-            x, ys = self._get_plot_data()
-            self.plotter.set_data(x, ys)
+        x = self._eeg_data['timestamps']
+        ys = self._get_samples()
+        self._plotter.set_data(x, ys)
 
-    def _get_plot_data(self):
-        x, ys = self._eeg_data['timestamps'], self._eeg_data['samples']
+    def _get_samples(self):
+        ys, rate = self._eeg_data['samples'], self._eeg_data['sample_rate']
         if self._filter_params:
-            ys = _apply_filter(
-                ys, self._filter_params, self._eeg_data['sample_rate'])
-
-        '''
-        if self._event_data:
-            self._plotter.plot_event(self._event_data['timestamps'])
-        if self.interactive:
-            self._plotter.seek_bar_dragged.connect(self._seek_bar_dragged)
-        '''
-        return x, ys
+            return _apply_filter(ys, self._filter_params, rate)
+        return ys
