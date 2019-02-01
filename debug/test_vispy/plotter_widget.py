@@ -1,6 +1,6 @@
 import copy
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import numpy as np
 import vispy.scene
 
@@ -156,6 +156,7 @@ class _MouseHandler:
         self._seek_bar_drag = False
 
     def process_event(self, event, picked):
+        result = {}
         if event.type == 'mouse_wheel':
             self._ctrl.zoom(1 + event.delta[1])
         elif event.type == 'mouse_press':
@@ -164,12 +165,15 @@ class _MouseHandler:
                 self._seek_bar_drag = self._is_seek_bar_clicked(event, picked)
         elif event.type == 'mouse_move' and event.is_dragging:
             if self._seek_bar_drag:
-                self._drag_seek_bar(event)
+                pos = self._drag_seek_bar(event)
+                self._ctrl.set_seek_bar(pos)
+                result = {'type': 'seek_bar', 'value': pos}
             else:
                 self._pan(event, event.last_event)
         elif event.type == 'mouse_release':
             self._viewbox_clicked = None
             self._seek_bar_drag = False
+        return result
 
     def _is_seek_bar_clicked(self, event, viewbox):
         s_ev = vispy.scene.events.SceneMouseEvent(event=event, visual=viewbox)
@@ -180,8 +184,7 @@ class _MouseHandler:
     def _drag_seek_bar(self, event):
         viewbox = self._viewbox_clicked
         s_ev = vispy.scene.events.SceneMouseEvent(event=event, visual=viewbox)
-        pos = viewbox.camera.transform.imap(s_ev.pos)
-        self._ctrl.set_seek_bar(pos[0])
+        return viewbox.camera.transform.imap(s_ev.pos)[0]
 
     def _pan(self, event, previous_event):
         pos1, pos2 = event.pos, previous_event.pos
@@ -191,7 +194,8 @@ class _MouseHandler:
 
 
 class Plotter(vispy.scene.SceneCanvas):
-    def __init__(self, n_plots=8, interactive=True, **kwargs):
+    def __init__(
+            self, n_plots=8, interactive=True, ui_event_cb=None, **kwargs):
         super().__init__(**kwargs)
         self.unfreeze()
 
@@ -200,6 +204,7 @@ class Plotter(vispy.scene.SceneCanvas):
 
         self._ctrl = _create_plots(n_plots, self.central_widget, interactive)
         self._mouse_handler = _MouseHandler(self._ctrl)
+        self._ui_event_cb = ui_event_cb
         self.central_widget.padding = 15
 
     def reset_range(self):
@@ -215,19 +220,23 @@ class Plotter(vispy.scene.SceneCanvas):
                 # visual_at is an expensive operation
                 # so only performs when necessary.
                 picked = self.visual_at(event.pos)
-            self._mouse_handler.process_event(event, picked)
+            result = self._mouse_handler.process_event(event, picked)
+            if result and self._ui_event_cb:
+                self._ui_event_cb(result)
         event.handled = True
 
 
-def _make_plotter(widget, n_plots, interactive):
+def _make_plotter(widget, n_plots, interactive, event_emitter):
     layout = QtWidgets.QVBoxLayout()
-    plotter = Plotter(n_plots=n_plots, interactive=interactive)
+    plotter = Plotter(n_plots, interactive, event_emitter)
     layout.addWidget(plotter.native)
     widget.setLayout(layout)
     return plotter
 
 
 class PlotterWidget(QtWidgets.QWidget):
+    ui_event = QtCore.pyqtSignal(dict)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -236,7 +245,8 @@ class PlotterWidget(QtWidgets.QWidget):
         self._filter_params = None
 
     def initialize(self, n_plots, interactive):
-        self._plotter = _make_plotter(self, n_plots, interactive)
+        self._plotter = _make_plotter(
+            self, n_plots, interactive, self.ui_event.emit)
 
     @property
     def filter_params(self):
@@ -260,7 +270,8 @@ class PlotterWidget(QtWidgets.QWidget):
         self._plotter.set_data(x, ys)
 
     def _get_samples(self):
-        ys, rate = self._eeg_data['samples'], self._eeg_data['sample_rate']
+        ys = self._eeg_data['samples']
         if self._filter_params:
-            return _apply_filter(ys, self._filter_params, rate)
+            ys = _apply_filter(
+                ys, self._filter_params, self._eeg_data['sample_rate'])
         return ys

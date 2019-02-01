@@ -35,11 +35,12 @@ def _main():
     window = QtWidgets.QMainWindow()
     widget = ViewerWidget()
     widget.initialize(n_plots=16, interactive=True)
+    widget.seek_bar_dragged.connect(lambda event: print(event))
     window.setCentralWidget(widget)
 
-    widget.plot(**_load_data())
+    widget.plot(_load_data()['eeg_data'])
     def update(_):
-        widget.set_data(**_load_data())
+        widget.set_data(_load_data()['eeg_data'])
     timer = vispy.app.Timer(interval=1/15, connect=update, start=True)
 
     window.show()

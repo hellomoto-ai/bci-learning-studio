@@ -13,6 +13,8 @@ def _get_designer(parent, on_change, on_reject):
 
 
 class ViewerWidget(QtWidgets.QWidget):
+    seek_bar_dragged = QtCore.pyqtSignal(float)
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.ui = Ui_ViewerWidget()
@@ -24,14 +26,19 @@ class ViewerWidget(QtWidgets.QWidget):
         self._filter_params_prev = None
         self._filter_designer = None
 
+    def _emit_event(self, event):
+        if event['type'] == 'seek_bar':
+            self.seek_bar_dragged.emit(event['value'])
+
     def initialize(self, n_plots, interactive):
         self.ui.plotter.initialize(n_plots, interactive)
+        self.ui.plotter.ui_event.connect(self._emit_event)
 
-    def set_data(self, eeg_data, event_data):
-        self.ui.plotter.set_data(eeg_data, event_data)
+    def set_data(self, eeg_data):
+        self.ui.plotter.set_data(eeg_data)
 
-    def plot(self, eeg_data, event_data):
-        self.ui.plotter.set_data(eeg_data, event_data)
+    def plot(self, eeg_data):
+        self.ui.plotter.set_data(eeg_data)
         self.ui.plotter.reset_range()
 
     def _launch_filter_config(self):
