@@ -16,11 +16,11 @@ class SampleViewer(QtWidgets.QMainWindow):
         super().__init__(parent=parent)
         self.ui = Ui_SampleViewer()
         self.ui.setupUi(self)
-        self.ui.viewer.init_plotter(interactive=False)
+        self.ui.viewer.initialize(n_plots=8, interactive=False)
 
         self._timer = QtCore.QTimer()
         self._timer.timeout.connect(self._plot)
-        self._timer.setInterval(100)
+        self._timer.setInterval(150)
 
         self.n_samples = n_samples
         self._eeg_data = {

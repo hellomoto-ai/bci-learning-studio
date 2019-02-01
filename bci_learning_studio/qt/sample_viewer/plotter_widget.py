@@ -2,10 +2,10 @@ import copy
 
 from PyQt5 import QtWidgets, QtCore
 import numpy as np
+import scipy
 import vispy.scene
 
-from bci_learning_studio.qt.sample_viewer.viewer import _apply_filter
-import vispy_util
+from bci_learning_studio.qt import vispy_util
 
 
 def _get_lim(vals, margin=0.05):
@@ -129,7 +129,7 @@ def _add_x_axis(grid, viewbox, max_axis_width):
 
 def _create_plots(
         n_plots, widget, interactive,
-        axis_width=30, line_color=(0.08, 0.08, 1.0, 0.8)):
+        axis_width=50, line_color=(0.08, 0.08, 1.0, 0.8)):
     kwargs = {'margin': 0, 'spacing': 0, 'padding': 0}
     base_grid = widget.add_grid(**kwargs)
     ctrl = _ViewBoxController()
@@ -232,6 +232,19 @@ def _make_plotter(widget, n_plots, interactive, event_emitter):
     layout.addWidget(plotter.native)
     widget.setLayout(layout)
     return plotter
+
+
+def _get_butter_filter(sample_rate, btype, wn, n_order):
+    return scipy.signal.butter(
+        n_order, wn, btype=btype, analog=False, fs=sample_rate)
+
+
+def _apply_filter(data, filter_params, sample_rate):
+    if filter_params['type'] == 'butter':
+        b, a = _get_butter_filter(sample_rate, **filter_params['params'])
+    else:
+        raise ValueError('Unexpected filter type; %s' % filter_params['type'])
+    return scipy.signal.lfilter(b, a, data, axis=1)
 
 
 class PlotterWidget(QtWidgets.QWidget):

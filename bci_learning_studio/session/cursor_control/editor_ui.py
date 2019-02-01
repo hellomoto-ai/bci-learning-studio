@@ -71,4 +71,4 @@ class Ui_Editor(object):
         self.actionOpen.setShortcut(_translate("Editor", "Ctrl+O"))
 
 from .cursor_replay import CursorReplay
-from bci_learning_studio.qt.sample_viewer.viewer import ViewerWidget
+from bci_learning_studio.qt.sample_viewer.viewer_widget import ViewerWidget

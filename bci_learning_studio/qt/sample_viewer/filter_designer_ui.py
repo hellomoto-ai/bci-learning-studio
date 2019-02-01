@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './bci_learning_studio/qt/sample_viewer/filter_designer_ui.ui'
+# Form implementation generated from reading ui file './debug/test_vispy/filter_designer_ui.ui'
 #
 # Created by: PyQt5 UI code generator 5.11.3
 #
@@ -41,7 +41,7 @@ class Ui_filterDesigner(object):
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.plotter = PlotWidget(filterDesigner)
+        self.plotter = QtWidgets.QWidget(filterDesigner)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -67,4 +67,3 @@ class Ui_filterDesigner(object):
         self.label_bandwidth.setText(_translate("filterDesigner", "Bandwidth"))
         self.label_order.setText(_translate("filterDesigner", "Order"))
 
-from pyqtgraph import PlotWidget

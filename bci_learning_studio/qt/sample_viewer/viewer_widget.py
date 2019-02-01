@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
-from viewer_widget_ui import Ui_ViewerWidget
-from filter_designer import FilterDesigner
+from .viewer_widget_ui import Ui_ViewerWidget
+from .filter_designer import FilterDesigner
 
 
 def _get_designer(parent, on_change, on_reject):

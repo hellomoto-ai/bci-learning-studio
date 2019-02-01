@@ -10,7 +10,7 @@ _LG = logging.getLogger(__name__)
 class SampleAcquisitionThread(QtCore.QThread):
     acquired = QtCore.pyqtSignal('PyQt_PyObject')
 
-    def __init__(self, board, wait_factor=0.85):
+    def __init__(self, board, wait_factor=0.5):
         super().__init__()
         self._board = board
         self.wait_factor = wait_factor

@@ -43,4 +43,4 @@ class Ui_ViewerWidget(object):
         self.configureFilter.setText(_translate("ViewerWidget", "Configure Filter"))
         self.clearFilter.setText(_translate("ViewerWidget", "Clear Filter"))
 
-from plotter_widget import PlotterWidget
+from bci_learning_studio.qt.sample_viewer.plotter_widget import PlotterWidget

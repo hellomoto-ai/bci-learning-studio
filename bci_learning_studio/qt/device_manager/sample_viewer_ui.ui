@@ -26,7 +26,7 @@
   <customwidget>
    <class>ViewerWidget</class>
    <extends>QWidget</extends>
-   <header>bci_learning_studio.qt.sample_viewer.viewer</header>
+   <header>bci_learning_studio.qt.sample_viewer.viewer_widget</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

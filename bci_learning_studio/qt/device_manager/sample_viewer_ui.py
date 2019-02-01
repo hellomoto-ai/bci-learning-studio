@@ -31,4 +31,4 @@ class Ui_SampleViewer(object):
         _translate = QtCore.QCoreApplication.translate
         SampleViewer.setWindowTitle(_translate("SampleViewer", "Plot"))
 
-from bci_learning_studio.qt.sample_viewer.viewer import ViewerWidget
+from bci_learning_studio.qt.sample_viewer.viewer_widget import ViewerWidget

@@ -66,7 +66,7 @@ class Editor(QtWidgets.QMainWindow):
         self.ui = Ui_Editor()
         self.ui.setupUi(self)
 
-        self.ui.viewer.init_plotter(interactive=True)
+        self.ui.viewer.initialize(n_plots=16, interactive=True)
         self.ui.actionOpen.triggered.connect(self._open_file)
 
         qt_util.restore_window_position(self)
@@ -108,7 +108,7 @@ class Editor(QtWidgets.QMainWindow):
         self._plot()
 
     def _plot(self):
-        self.ui.viewer.plot(self._data['eeg'], self._data['target'])
+        self.ui.viewer.plot(self._data['eeg'])
         self.ui.viewer.seek_bar_dragged.connect(self._update_replay)
 
         self.ui.cursorReplay.set_cursor(x=0, y=1)

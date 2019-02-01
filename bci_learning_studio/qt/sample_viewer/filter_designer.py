@@ -1,9 +1,11 @@
 import numpy as np
 import scipy.signal
 from PyQt5 import QtWidgets, QtCore
-import pyqtgraph as pg
+import vispy.app
+import vispy.gloo
 
 from .filter_designer_ui import Ui_filterDesigner
+from bci_learning_studio.qt import vispy_util
 
 
 def _init_btype_selector(combo_box):
@@ -28,6 +30,49 @@ def _get_plot(filter_params):
     raise ValueError('Unexpected filter type; %s' % filter_params['type'])
 
 
+def _init_plot(widget, max_axis_width=40):
+    viewbox = vispy.scene.ViewBox(camera='panzoom')
+    line = vispy.scene.visuals.Line(np.array([[0, 0]]), color='w')
+    viewbox.add(vispy.scene.visuals.GridLines())
+    viewbox.add(line)
+
+    yaxis = vispy_util.get_axis(orientation='left')
+    yaxis.width_max = max_axis_width
+
+    xaxis = vispy_util.get_axis(orientation='bottom')
+    xaxis.height_max = max_axis_width
+    grid = widget.add_grid()
+    grid.add_widget(yaxis, row=0, col=0)
+    grid.add_widget(xaxis, row=1, col=1)
+    grid.add_widget(viewbox, row=0, col=1)
+
+    yaxis.link_view(viewbox)
+    xaxis.link_view(viewbox)
+    return viewbox, line
+
+
+class _Plotter(vispy.scene.SceneCanvas):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unfreeze()
+        self.viewbox, self.line = _init_plot(self.central_widget)
+
+    def _process_mouse_event(self, event):
+        event.handled = True
+
+    def plot(self, x, y):
+        self.line.set_data(pos=np.vstack((x, y)).T)
+        self.viewbox.camera.set_range()
+
+
+def _make_plotter(widget):
+    layout = QtWidgets.QVBoxLayout()
+    plotter = _Plotter()
+    layout.addWidget(plotter.native)
+    widget.setLayout(layout)
+    return plotter
+
+
 class FilterDesigner(QtWidgets.QDialog):
     changed = QtCore.pyqtSignal('PyQt_PyObject')
 
@@ -36,6 +81,8 @@ class FilterDesigner(QtWidgets.QDialog):
 
         self.ui = Ui_filterDesigner()
         self.ui.setupUi(self)
+
+        self._plotter = _make_plotter(self.ui.plotter)
 
         _init_btype_selector(self.ui.bandTypeSelector)
         self.ui.filterOrder.setValue(2)
@@ -55,15 +102,7 @@ class FilterDesigner(QtWidgets.QDialog):
     def plot(self):
         filter_params = self._get_filter_params()
         x, y = _get_plot(filter_params)
-
-        self.ui.plotter.clear()
-        self.ui.plotter.setBackground('w')
-        self.ui.plotter.plot(x, y, pen=pg.mkPen('k', width=2))
-        self.ui.plotter.setMouseEnabled(False, False)
-        self.ui.plotter.showGrid(x=True, y=True)
-        self.ui.plotter.setLabel(axis='bottom', text='Freq', units='Hz')
-        self.ui.plotter.setLabel(axis='left', text='Gain')
-
+        self._plotter.plot(x, y)
         self.changed.emit(filter_params)
 
     def _get_filter_params(self):
